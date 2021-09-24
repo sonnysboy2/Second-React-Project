@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { useState, useCallback, useRef } from 'react';
 import { render } from 'react-dom';
 
@@ -55,8 +55,56 @@ export class Board {
   public getSpot(r: number, c: number) {
     return this.board[r][c];
   }
-  public takeSpace(r: number, c: number, user: string) {
-    this.board[r][c] = user;
+  /**
+   * @returns 1 if player 1 wins, 2 if player 2 wins, 0 if else.
+   */
+  public calcWin(): number {
+    for (let row = 0; row < 3; row++) {
+      if (
+        this.board[row][0] === this.board[row][1] &&
+        this.board[row][1] === this.board[row][2]
+      ) {
+        if (this.board[row][0] === this.playerOneChar) return 1;
+        else if (this.board[row][0] === this.playerTwoChar) return 2;
+      }
+    }
+
+    for (let col = 0; col < 3; col++) {
+      if (
+        this.board[0][col] === this.board[1][col] &&
+        this.board[1][col] === this.board[2][col]
+      ) {
+        if (this.board[0][col] === this.playerOneChar) return 1;
+        else if (this.board[0][col] === this.playerTwoChar) return 2;
+      }
+    }
+
+    if (
+      this.board[0][0] === this.board[1][1] &&
+      this.board[1][1] === this.board[2][2]
+    ) {
+      if (this.board[0][0] === this.playerOneChar) return 1;
+      else if (this.board[0][0] === this.playerTwoChar) return 2;
+    }
+
+    if (
+      this.board[0][2] === this.board[1][1] &&
+      this.board[1][1] === this.board[2][0]
+    ) {
+      if (this.board[0][2] === this.playerOneChar)
+        // check diagonally
+        return 1;
+      else if (this.board[0][2] === this.playerTwoChar) return 2;
+    }
+    return 0;
+  }
+
+  /**
+   * @returns true iff the space was not taken.
+   */
+  public takeSpace(r: number, c: number, user: string): boolean {
+    if (this.calcWin() || this.board[r][c] !== '_') return false;
+    return !!(this.board[r][c] = user);
   }
 
   //  return [playerOneChar, playerTwoChar, setTaken, getBoard, isTaken];
@@ -64,20 +112,36 @@ export class Board {
 export const BoardComponent = ({ props }) => {
   const board: Board = props;
   const [turn, setTurn] = useState(true);
+  const [winState, setWinState] = useState(0);
 
-  const handleClick = (row : number, col : number) => {
-    board.takeSpace(
-      row,
-      col,
-      turn ? board.getPlayerOne() : board.getPlayerTwo()
-    );
-    setTurn(!turn);
+  const handleClick = (row: number, col: number) => {
+    if (
+      board.takeSpace(
+        row,
+        col,
+        turn ? board.getPlayerOne() : board.getPlayerTwo()
+      )
+    ) {
+      setTurn(!turn);
+    } else {
+      // do css stuff with the element
+    }
+
+    setWinState(board.calcWin());
+    if (winState) {
+      console.log('player ' + winState + ' wins!');
+      return;
+    }
     console.log(turn);
   };
 
   const useBoardButton = (row: number, col: number) => {
     return (
-      <button className='boardButton' onClick={() => handleClick(row, col)}>
+      <button
+        id={`r${row}c${col}`}
+        className='boardButton'
+        onClick={() => handleClick(row, col)}
+      >
         {board.getSpot(row, col)}
       </button>
     );
@@ -99,6 +163,13 @@ export const BoardComponent = ({ props }) => {
         {useBoardButton(2, 1)}
         {useBoardButton(2, 2)}
       </div>
+      <span className='textDisplay'>
+        {winState
+          ? 'Player ' + winState + ' wins!'
+          : `It is currently ${
+              turn ? "Player one's turn" : "Player two's turn"
+            }`}
+      </span>
     </div>
   );
 };
@@ -107,9 +178,10 @@ export function App() {
   const board = useRef();
 
   return (
-    <div className='Board'>
-      <BoardComponent props={new Board("x", "o")} />
-      hello world
+    <div className='wrapper'>
+      <div className='Board'>
+        <BoardComponent props={new Board('x', 'o')} />
+      </div>
     </div>
   );
 }

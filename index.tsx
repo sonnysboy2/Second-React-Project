@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { render } from 'react-dom';
 
 // import React, { useState } from 'react';
@@ -106,14 +106,12 @@ export class Board {
     if (this.calcWin() || this.board[r][c] !== '_') return false;
     return !!(this.board[r][c] = user);
   }
-
-  //  return [playerOneChar, playerTwoChar, setTaken, getBoard, isTaken];
 }
 export const BoardComponent = ({ props }) => {
   const board: Board = props;
   const [turn, setTurn] = useState(true);
   const [winState, setWinState] = useState(0);
-
+  const [classState, setClassState] = useState('rows');
   const handleClick = (row: number, col: number) => {
     if (
       board.takeSpace(
@@ -128,8 +126,9 @@ export const BoardComponent = ({ props }) => {
     }
 
     setWinState(board.calcWin());
-    if (winState) {
+    if (board.calcWin()) {
       console.log('player ' + winState + ' wins!');
+      setClassState('winState');
       return;
     }
     console.log(turn);
@@ -146,23 +145,28 @@ export const BoardComponent = ({ props }) => {
       </button>
     );
   };
+  let indx = 0;
+  let indy = 0;
+
   return (
-    <div className='rows'>
-      <div className='row'>
-        {useBoardButton(0, 0)}
-        {useBoardButton(0, 1)}
-        {useBoardButton(0, 2)}
+    <div className='mainBoard'>
+      <div className={classState}>
+      <div className = 'row'>
+      {Array.from({length: 9} , (_, i) => i).map((v, i) => {
+        indx = Math.floor( i / 3);
+        indy++;
+        if (i % 3 === 0) {
+          return (
+            <span>
+            <br />
+            {useBoardButton(indx, indy -= indy)}
+            </span>
+          )
+        }
+        return useBoardButton(indx, indy)
+      })}
       </div>
-      <div className='row'>
-        {useBoardButton(1, 0)}
-        {useBoardButton(1, 1)}
-        {useBoardButton(1, 2)}
-      </div>
-      <div className='row'>
-        {useBoardButton(2, 0)}
-        {useBoardButton(2, 1)}
-        {useBoardButton(2, 2)}
-      </div>
+      </div> 
       <span className='textDisplay'>
         {winState
           ? 'Player ' + winState + ' wins!'

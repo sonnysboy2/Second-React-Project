@@ -1,0 +1,32 @@
+body {
+  color: #fcbe24;
+}
+
+.wrapper {
+  justify-content: space-evenly;
+  
+}
+.textDisplay {
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  color: blueviolet;
+  font-size: 24px;
+  float: left;
+  margin-block: 3vh;
+}
+
+.row {
+  margin-block: 3vh;
+  margin: auto;
+  width: 400px;
+  
+}
+.row button {
+  width: 128px;
+  height: 128px;
+  font-size: 60px;
+}
+/* .row button:hover { */
+  /* transition-duration: 2s; */
+  /* opacity: 40%; */
+/* } */
